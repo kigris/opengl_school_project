@@ -26,14 +26,19 @@ void render(uint32_t program, uint32_t VAO) {
     glClear(GL_COLOR_BUFFER_BIT);
     glUseProgram(program);
     glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 }
 
-uint32_t createVertexData(uint32_t* VBO) {
+uint32_t createVertexData(uint32_t* VBO, uint32_t* EBO) {
     float vertices[] = {
-        -0.5f, -0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f,
-        0.0f,  0.5f, 0.0f
+        0.5f, 0.5f, 0.0f, // top right
+        0.5f, -0.5f, 0.0f, // bottom right
+        -0.5f, -0.5f, 0.0f, // bottom left
+        -0.5f,  0.5f, 0.0f // top left
+    };
+    
+    uint32_t indices[] = { 0, 3, 1,  // first triangle
+                           1, 3, 2   // second triangle
     };
 
     // Create vertex buffer object
@@ -49,6 +54,10 @@ uint32_t createVertexData(uint32_t* VBO) {
     // Copy the vertex data to the buffer
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
+    // Bind the buffer to the GL_ELEMENT_ARRAY_BUFFER target
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    
     // Set attribute pointers
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), static_cast<void*>(nullptr));
     glEnableVertexAttribArray(0);
@@ -141,11 +150,18 @@ int main() {
 
     // Create program
     const uint32_t program = createProgram();
-    uint32_t VBO;
+    uint32_t VBO, EBO;
     // Create vertex data
-    const uint32_t VAO = createVertexData(&VBO);
+    const uint32_t VAO = createVertexData(&VBO, &EBO);
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    // Enable culling
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    
+    // Display only lines
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    
     // Main loop
     while(window->isAlive()) {
         handleInput();
