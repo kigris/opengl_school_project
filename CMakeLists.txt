@@ -46,7 +46,7 @@ foreach(PROJECT ${PROJECT_LIST})
     # Create project and add configure
     add_executable(${PROJECT} ${PROJECTS_PATH}/${PROJECT}/main.cpp ${DEPS_SRC_FILES})
     target_include_directories(${PROJECT} PRIVATE ${INCLUDE_PATHS})
-    target_compile_definitions(${PROJECT} PRIVATE -D_GLFW_USE_OPENGL=1)
+    target_compile_definitions(${PROJECT} PRIVATE -D_GLFW_USE_OPENGL=1 PROJECT_PATH="${PROJECTS_PATH}/${PROJECT}/" ASSETS_PATH="${PROJECTS_PATH}/${PROJECT}/assets/")
     target_link_libraries(${PROJECT} PRIVATE EngineLib)
     target_compile_features(${PROJECT} PRIVATE cxx_std_17)
     configure_platform(${PROJECT})

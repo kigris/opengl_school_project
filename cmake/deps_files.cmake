@@ -72,6 +72,6 @@ else()
         ${DEPS_SRC_FILES_LINUX}
         ${DEPS_SRC_FILES_MACOS}
         PROPERTIES
-        COMPILE_FLAGS "-W0"
+        COMPILE_FLAGS "-Wall"
     )
 endif()
