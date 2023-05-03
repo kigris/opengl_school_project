@@ -53,7 +53,7 @@ foreach(PROJECT ${PROJECT_LIST})
     configure_compiler(${PROJECT})
 
     # Shaders
-    file(GLOB SHADERS_LIST ${PROJECTS_PATH}/${PROJECT}/*.vert ${PROJECTS_PATH}/${PROJECT}/.frag)
+    file(GLOB SHADERS_LIST ${PROJECTS_PATH}/${PROJECT}/*.vert ${PROJECTS_PATH}/${PROJECT}/*.frag)
     target_sources(${PROJECT} PRIVATE ${SHADERS_LIST})
     source_group(Shaders FILES ${SHADER_LIST})
 endforeach()

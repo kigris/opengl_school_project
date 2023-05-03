@@ -16,6 +16,7 @@
 #endif
 
 #include <iostream>
+#define _USE_MATH_DEFINES
 #include <math.h>
 #include "engine/window.hpp"
 #include "engine/input.hpp"
@@ -382,19 +383,23 @@ uint32_t createHexagonData(uint32_t* VBO, uint32_t* EBO) {
 
 uint32_t createProceduralNSideObject(uint32_t* VBO, uint32_t* EBO, uint32_t* numVertices, int sides, float radius, float offX, float offY) {
     // Create vertex data
-    float vertices[sides*3];
-    uint32_t indices[((sides-2)*3)];
-    *numVertices = (sides-2)*3;
-
+    // TODO: Dyanmic illegal allocation
+    // float* vertices = (float*)malloc(sizeof(float) * sides * 3);^
+    float* __restrict vertices = new float[sides * 3];
+    int verticesSize = sizeof(float) * sides * 3;
+    uint32_t* indices = new uint32_t[(sides-2)*3];
+    int indicesSize = sizeof(uint32_t) * (sides-2)*3;
+    *numVertices = uint32_t((sides-2)*3);
+    
     // Calculate angle between vertices in degrees
-    float angle = 360.0f / sides;
+    float angle = 360.0f / (float)sides;
     // Convert angle to radians
     float angleRad = angle * M_PI / 180.0f;
 
     // Create vertices
     for(int i=0; i < sides; i++) {
-        vertices[i*3] = radius * cos(angleRad * i) + offX;
-        vertices[i*3+1] = radius * sin(angleRad * i) + offY;
+        vertices[i*3] = radius * cos(angleRad * (float)i) + offX;
+        vertices[i*3+1] = radius * sin(angleRad * (float)i) + offY;
         vertices[i*3+2] = 0.0f;
     }
 
@@ -402,14 +407,11 @@ uint32_t createProceduralNSideObject(uint32_t* VBO, uint32_t* EBO, uint32_t* num
     uint32_t curr_exp = 0;
     uint32_t counter = 0;
     uint32_t curr_pow = 0;
-    uint32_t shapeSides = sides;
+    uint32_t shapeSides = uint32_t(sides);
     while(shapeSides >= 3) {
         curr_pow = pow(2, curr_exp);
         for(int i=0; (curr_pow*(i+1)) < sides; i+=2) {
-            if(i == 0)
-                indices[counter] = 0;
-            else
-                indices[counter] = curr_pow*i;
+            indices[counter] = curr_pow*i;
             indices[counter+1] = (curr_pow*(i+1));
             if ((curr_pow*(i+2)) >= sides){
                 indices[counter+2] = 0;
@@ -420,7 +422,7 @@ uint32_t createProceduralNSideObject(uint32_t* VBO, uint32_t* EBO, uint32_t* num
                 indices[counter+2] = (curr_pow*(i+2));
             counter += 3;
         }
-        shapeSides = ceil(shapeSides/2.0f);
+        shapeSides = (uint32_t)(ceil((float)shapeSides/2.0f));
         curr_exp++;
     }
 
@@ -434,9 +436,9 @@ uint32_t createProceduralNSideObject(uint32_t* VBO, uint32_t* EBO, uint32_t* num
 
     glGenBuffers(1, EBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesSize, indices, GL_STATIC_DRAW);
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, verticesSize, vertices, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
@@ -459,7 +461,7 @@ int main() {
     uint32_t VBO, EBO, numVertices;
     // Create vertex data
     // const uint32_t VAO = createVertexData(VBO, EBO);
-    const uint32_t VAO = createProceduralNSideObject(&VBO, &EBO, &numVertices, 14, 0.5f, 0.4f, 0.2f);
+    const uint32_t VAO = createProceduralNSideObject(&VBO, &EBO, &numVertices, 99, 0.5f, 0.4f, 0.2f);
     // Crea
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     // Enable culling
