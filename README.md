@@ -1,1 +1,1 @@
-# opengl_school_project
+# OpenGL School Project
