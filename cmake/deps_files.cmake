@@ -1,7 +1,8 @@
 #Include paths for deps
 set(INCLUDE_PATHS
     ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/deps/glfw)
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/deps/glfw
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/deps/stb)
 
 #Common Dependency Files
 set(DEPS_SRC_FILES_COMMON
@@ -11,7 +12,8 @@ set(DEPS_SRC_FILES_COMMON
     ${CMAKE_CURRENT_SOURCE_DIR}/src/deps/glfw/monitor.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/deps/glfw/window.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/deps/glfw/vulkan.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/deps/glad/glad.c)
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/deps/glad/glad.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/deps/stb/stb_image.h)
 
 #Windows Dependency Files
 set(DEPS_SRC_FILES_WIN

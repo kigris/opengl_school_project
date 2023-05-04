@@ -6,4 +6,5 @@ set(ENGINE_HEADER_FILES
 set(ENGINE_SRC_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/engine/window.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/engine/shader.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/engine/deps.cpp
 )

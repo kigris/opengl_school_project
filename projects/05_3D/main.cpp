@@ -10,6 +10,9 @@
 // Warning of includes that it is wanted to be ignored
 #include <glad/glad.h>
 #include "stb_image.h"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #ifdef _WIN32 // If OS is Windows
 #pragma warning(pop)
 #else // If OS is MacOS or Linux
