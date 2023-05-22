@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-class GLFWwindow;
+struct GLFWwindow;
 
 class Window {
 public:
