@@ -104,6 +104,8 @@ void render(const Shader &s_light, const Shader &s_phong, const Geometry &geo, i
     s_phong.set("ambientStrength", 0.1f);
     s_phong.set("specularStrength", 0.5f);
     s_phong.set("shininess", 32);
+    // Set the uniform for the view matrix
+    s_phong.set("viewMat", view);
     geo.render();
 }
 
