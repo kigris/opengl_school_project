@@ -17,8 +17,8 @@ public:
     static bool isKeyPressed(int key) {return Window::instance()->isKeyPressed(key);}
     // Functions to set the callbacks
     void setKeyPressedCallback(function<void(int, int)> f) { _keyPressedCallback = f; }
-    void setMouseMoveCallback(function<void(float, float)>& f) { _mouseMoveCallback = f; }
-    void setMouseScrollCallback(function<void(float, float)>& f) { _mouseScrollCallback = f; }
+    void setMouseMoveCallback(function<void(double, double)> f) { _mouseMoveCallback = f; }
+    void setMouseScrollCallback(function<void(double, double)> f) { _mouseScrollCallback = f; }
 
     // Function to call the key pressed callback
     void keyPressed(int key, int action) const {

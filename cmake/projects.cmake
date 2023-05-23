@@ -5,4 +5,5 @@ set(PROJECT_LIST
     04_Textures
     05_3D
     06_Camera
+    07_Phong
 )

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef __TEXTURE_H__
+#define __TEXTURE_H__
 
 #include <cstdint>
 #include <utility>
@@ -53,3 +54,5 @@ class Texture {
         std::pair<Filter, Filter> _filter{Filter::Linear, Filter::Linear};
         std::pair<Filter, Filter> _filterMipMap{Filter::None, Filter::None};
 };
+
+#endif // __TEXTURE_H__
