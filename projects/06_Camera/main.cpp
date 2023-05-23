@@ -101,6 +101,33 @@ void handleInput(GLFWwindow *window, float deltaTime)
         cameraPos += speed * cameraRight;
 }
 
+glm::mat4 lookAt(const glm::vec3 &cameraPosition, const glm::vec3 &targetPosition, const glm::vec3 &upDirection)
+{
+    // Calculate the forward vector (from the camera to the target)
+    glm::vec3 forwardVector(glm::normalize(targetPosition - cameraPosition));
+    // Calculate the right vector (perpendicular to the forward vector and up direction)
+    glm::vec3 rightVector(glm::normalize(glm::cross(forwardVector, upDirection)));
+    // Recalculate the orthonormal up vector (perpendicular to the right and forward vectors)
+    glm::vec3 orthonormalUpVector(glm::cross(rightVector, forwardVector));
+    // Create the lookAt matrix
+    glm::mat4 lookAtMatrix(1);  // Start with an identity matrix
+    // Set the right, up, and forward vectors in the matrix
+    // Note: These vectors become the columns of the rotation matrix portion of the lookAt matrix
+    lookAtMatrix[0] = glm::vec4(rightVector, 0);
+    lookAtMatrix[1] = glm::vec4(orthonormalUpVector, 0);
+    lookAtMatrix[2] = glm::vec4(-forwardVector, 0);
+    lookAtMatrix = glm::transpose(lookAtMatrix);  // Transpose the matrix to get the correct rotation
+
+    // Set the camera position in the matrix
+    glm::mat4 translation(1);
+    translation[3][0] = -cameraPosition.x;
+    translation[3][1] = -cameraPosition.y;
+    translation[3][2] = -cameraPosition.z;
+    // Combine the lookAt and translation matrices to create the view matrix
+    lookAtMatrix = lookAtMatrix * translation;
+    return lookAtMatrix;
+}
+
 // Render VAO
 void render(const Shader &shader, const Sphere &sphere, int n, uint32_t tex, uint32_t tex2)
 {
@@ -130,8 +157,11 @@ void render(const Shader &shader, const Sphere &sphere, int n, uint32_t tex, uin
     //                          glm::vec3(0.0f, 0.0f, 0.0f),  // point to look
     //                          glm::vec3(0.0f, 1.0f, 0.0f)); // up vector
 
-    glm::mat4 view = glm::mat4(1.0f);
-    view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+    // glm::mat4 view = glm::mat4(1.0f);
+    // view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+
+    // Create view matrix using lookAt function
+    glm::mat4 view = lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 
     const glm::mat4 proj = glm::perspective(glm::radians(fov), 800.0f / 600.0f, 0.1f, 100.0f);
     // float aspect = 800.0f / 600.0f;
