@@ -95,7 +95,8 @@ void render(const Shader &s_light, const Shader &s_phong, const Geometry &geo, i
     s_phong.set("model", model);
     s_phong.set("view", view);
     s_phong.set("proj", proj);
-    glm::mat3 normalMat = glm::inverse(glm::transpose(glm::mat3(model)));
+    // Convert the normal matrix into view space before sending it to the shader
+    glm::mat3 normalMat = glm::inverse(glm::transpose(glm::mat3(view * model)));
     s_phong.set("normalMat", normalMat);
     s_phong.set("viewPos", camera.getPosition());
     s_phong.set("lightPos", 1.2f, 1.0f, 2.0f);
