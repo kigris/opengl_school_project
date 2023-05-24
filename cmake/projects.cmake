@@ -10,4 +10,5 @@ set(PROJECT_LIST
     09_LightMaps
     10_LightDir
     11_LightPoint
+    12_LightSpot
 )
