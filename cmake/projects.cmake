@@ -9,4 +9,5 @@ set(PROJECT_LIST
     08_Materials
     09_LightMaps
     10_LightDir
+    11_LightPoint
 )

@@ -11,7 +11,7 @@
 #include <glad/glad.h>
 #include "stb_image.h"
 #include <glm/glm.hpp>
-#include <GLFW/glfw3.h>
+#include <GLFW/glfw3.h>0
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #ifdef _WIN32 // If OS is Windows
@@ -63,48 +63,53 @@ void onMouseCallback(double xpos, double ypos)
     camera.handleMouseMovement(xoffset, yoffset);
 }
 
-void onScrollCallback(double xoffset, double yoffset) {
-  camera.handleMouseScroll(yoffset);
+void onScrollCallback(double xoffset, double yoffset)
+{
+    camera.handleMouseScroll(yoffset);
 }
 
 void handleInput(float deltaTime)
 {
-    Input* input = Input::instance();
-    if(input->isKeyPressed(GLFW_KEY_W)) {
+    Input *input = Input::instance();
+    if (input->isKeyPressed(GLFW_KEY_W))
+    {
         camera.handleKeyboard(Camera::Movement::Forward, deltaTime);
     }
-    if(input->isKeyPressed(GLFW_KEY_S)) {
+    if (input->isKeyPressed(GLFW_KEY_S))
+    {
         camera.handleKeyboard(Camera::Movement::Backward, deltaTime);
     }
-    if(input->isKeyPressed(GLFW_KEY_A)) {
+    if (input->isKeyPressed(GLFW_KEY_A))
+    {
         camera.handleKeyboard(Camera::Movement::Left, deltaTime);
     }
-    if(input->isKeyPressed(GLFW_KEY_D)) {
+    if (input->isKeyPressed(GLFW_KEY_D))
+    {
         camera.handleKeyboard(Camera::Movement::Right, deltaTime);
     }
 }
 
 // Render VAO
-void render(const Shader &s_phong, const Geometry &cube, const Geometry &quad, int n, const Texture& tex_albedo, const Texture& tex_specular)
+void render(const Shader &s_light, const Shader &s_phong, const Geometry &cube, const Geometry &quad, int n, const Texture &tex_albedo, const Texture &tex_specular)
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     // Get the view matrix from camera
     glm::mat4 view = camera.getViewMatrix();
     // Set the projection matrix
     const glm::mat4 proj = glm::perspective(glm::radians(camera.getFOV()), 800.0f / 600.0f, 0.1f, 100.0f);
-    // s_light.use();
-    // // Model matrix for the light source
-    // glm::mat4 model = glm::mat4(1.0f);
-    // model = glm::translate(model, lightPos);
-    // model = glm::scale(model, glm::vec3(0.2f));
-    // s_light.set("model", model);
-    // s_light.set("view", view);
-    // s_light.set("proj", proj);
-    // geo.render();
+    s_light.use();
+    // Model matrix for the light source
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(model, lightPos);
+    model = glm::scale(model, glm::vec3(0.2f));
+    s_light.set("model", model);
+    s_light.set("view", view);
+    s_light.set("proj", proj);
+    cube.render();
 
     s_phong.use();
     // Model matrix for the light source
-    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(0.0f, -0.5f, 0.0f));
     model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
     s_phong.set("model", model);
@@ -121,13 +126,17 @@ void render(const Shader &s_phong, const Geometry &cube, const Geometry &quad, i
     s_phong.set("material.shininess", 128);
 
     // Set uniforms for the material
-    s_phong.set("light.direction", 0.0f, -1.0f, 0.0f);
+    s_phong.set("light.position", lightPos);
     s_phong.set("light.ambient", 0.1f, 0.1f, 0.1f);
     s_phong.set("light.diffuse", 0.5f, 0.5f, 0.5f);
     s_phong.set("light.specular", 1.0f, 1.0f, 1.0f);
+    s_phong.set("light.constant", 1.0f);
+    s_phong.set("light.linear", 0.09f);
+    s_phong.set("light.quadratic", 0.032f);
     quad.render();
 
-    for(auto& cubePos : cubePositions) {
+    for (auto &cubePos : cubePositions)
+    {
         model = glm::mat4(1.0f);
         model = glm::translate(model, cubePos);
         s_phong.set("model", model);
@@ -145,6 +154,7 @@ int main()
     const Cube cube(0.75f);
     const Quad quad(10.0f);
     // Create program
+    const Shader s_light(PROJECT_PATH "light.vert", PROJECT_PATH "light.frag");
     const Shader s_phong(PROJECT_PATH "phong.vert", PROJECT_PATH "blinn.frag");
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     // Enable culling
@@ -173,7 +183,7 @@ int main()
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
         handleInput(deltaTime);
-        render(s_phong, cube, quad, 36, tex_albedo, tex_specular);
+        render(s_light, s_phong, cube, quad, 36, tex_albedo, tex_specular);
         window->frame();
     }
 
