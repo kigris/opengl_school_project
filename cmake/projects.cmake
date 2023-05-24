@@ -8,4 +8,5 @@ set(PROJECT_LIST
     07_Phong
     08_Materials
     09_LightMaps
+    10_LightDir
 )
