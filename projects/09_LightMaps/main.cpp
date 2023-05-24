@@ -25,7 +25,7 @@
 #include "engine/input.hpp"
 #include "engine/window.hpp"
 #include "engine/shader.hpp"
-#include "engine/geometry/sphere.hpp"
+#include "engine/geometry/cube.hpp"
 #include "engine/camera.hpp"
 #include "engine/texture.hpp"
 
@@ -73,7 +73,7 @@ void handleInput(float deltaTime)
 }
 
 // Render VAO
-void render(const Shader &s_light, const Shader &s_phong, const Geometry &geo, int n)
+void render(const Shader &s_light, const Shader &s_phong, const Geometry &geo, int n, const Texture& tex_albedo, const Texture& tex_specular)
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     // Get the view matrix from camera
@@ -100,10 +100,11 @@ void render(const Shader &s_light, const Shader &s_phong, const Geometry &geo, i
     s_phong.set("normalMat", normalMat);
     s_phong.set("viewPos", camera.getPosition());
     // Set uniforms for the material
-    s_phong.set("material.ambient", 1.0f, 0.5f, 0.31f);
-    s_phong.set("material.diffuse", 1.0f, 0.5f, 0.31f);
-    s_phong.set("material.specular", 0.5f, 0.5f, 0.5f);
-    s_phong.set("material.shininess", 0.6f);
+    tex_albedo.use(s_phong, "material.diffuse", 0);
+    tex_specular.use(s_phong, "material.specular", 1);
+    s_phong.set("material.diffuse", 0);
+    s_phong.set("material.specular", 1);
+    s_phong.set("material.shininess", 128);
 
     // Set uniforms for the material
     s_phong.set("light.position", lightPos);
@@ -118,7 +119,7 @@ int main()
     // Get window instance
     Window *window = Window::instance();
     // Create sphere
-    const Sphere sphere(0.75f, 50, 50);
+    const Cube sphere(0.75f);
     // Create program
     const Shader s_light(PROJECT_PATH "light.vert", PROJECT_PATH "light.frag");
     const Shader s_phong(PROJECT_PATH "phong.vert", PROJECT_PATH "blinn.frag");
@@ -132,7 +133,8 @@ int main()
 
     // Display only lines
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
+    const Texture tex_albedo(ASSETS_PATH "textures/bricks_albedo.png", Texture::Format::RGB);
+    const Texture tex_specular(ASSETS_PATH "textures/bricks_specular.png", Texture::Format::RGB);
     // Set mouse callback
     Input::instance()->setMouseMoveCallback(onMouseCallback);
     Input::instance()->setMouseScrollCallback(onScrollCallback);
@@ -148,7 +150,7 @@ int main()
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
         handleInput(deltaTime);
-        render(s_light, s_phong, sphere, 36);
+        render(s_light, s_phong, sphere, 36, tex_albedo, tex_specular);
         window->frame();
     }
 
