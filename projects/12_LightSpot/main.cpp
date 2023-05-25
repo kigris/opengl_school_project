@@ -126,16 +126,16 @@ void render(const Shader &s_light, const Shader &s_phong, const Geometry &cube, 
     s_phong.set("material.shininess", 128);
 
     // Set uniforms for the material
-    s_phong.set("light.position", lightPos);
-    s_phong.set("light.ambient", 0.1f, 0.1f, 0.1f);
-    s_phong.set("light.diffuse", 0.5f, 0.5f, 0.5f);
+    s_phong.set("light.position", camera.getPosition());
+    s_phong.set("light.ambient", 0.05f, 0.05f, 0.05f);
+    s_phong.set("light.diffuse", 1.0f, 1.0f, 1.0f);
     s_phong.set("light.specular", 1.0f, 1.0f, 1.0f);
     s_phong.set("light.constant", 1.0f);
-    s_phong.set("light.linear", 0.09f);
-    s_phong.set("light.quadratic", 0.032f);
-    s_phong.set("light.direction", 0.3f, -0.75f, -1.0f);
-    s_phong.set("light.cutOff", glm::cos(glm::radians(20.0f)));
-    s_phong.set("light.outerCutOff", glm::cos(glm::radians(40.0f)));
+    s_phong.set("light.linear", 0.22f);
+    s_phong.set("light.quadratic", 0.20f);
+    s_phong.set("light.direction", camera.getDirection());
+    s_phong.set("light.cutOff", glm::cos(glm::radians(15.0f)));
+    s_phong.set("light.outerCutOff", glm::cos(glm::radians(25.0f)));
     quad.render();
 
     for (auto &cubePos : cubePositions)
