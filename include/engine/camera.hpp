@@ -25,6 +25,7 @@ public:
     [[nodiscard]] glm::mat4 getViewMatrix() const;
     [[nodiscard]] float getFOV() const;
     [[nodiscard]] glm::vec3 getPosition() const;
+    [[nodiscard]] glm::vec3 getDirection() const;
 
     void handleKeyboard(Movement direction, float dt);
     void handleMouseMovement(float xoffset, float yoffset, bool constrainPitch = true);
