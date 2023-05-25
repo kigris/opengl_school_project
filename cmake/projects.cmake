@@ -13,4 +13,5 @@ set(PROJECT_LIST
     12_LightSpot
     13_CustomObjects
     14_Stencil
+    15_NormalMapping
 )
