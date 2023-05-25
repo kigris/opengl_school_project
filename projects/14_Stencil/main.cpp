@@ -44,7 +44,7 @@ glm::vec3 cubePositions[] = {
 bool firstMouse = true;
 double lastX, lastY;
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
-glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+glm::vec3 lightPos(0.0f, 5.0f, 2.0f);
 
 void onMouseCallback(double xpos, double ypos)
 {
@@ -90,9 +90,9 @@ void handleInput(float deltaTime)
 }
 
 // Render VAO
-void render(const Shader &s_light, const Shader &s_phong, const Geometry &cube, const Geometry &quad, int n, const Texture &tex_albedo, const Texture &tex_specular)
+void render(const Shader &s_light, const Shader &s_phong, const Shader &s_stencil, const Geometry &cube, const Geometry &quad, int n, const Texture &tex_albedo, const Texture &tex_specular)
 {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     // Get the view matrix from camera
     glm::mat4 view = camera.getViewMatrix();
     // Set the projection matrix
@@ -126,27 +126,52 @@ void render(const Shader &s_light, const Shader &s_phong, const Geometry &cube, 
     s_phong.set("material.shininess", 128);
 
     // Set uniforms for the material
-    s_phong.set("light.position", camera.getPosition());
+    s_phong.set("light.position", lightPos);
     s_phong.set("light.ambient", 0.05f, 0.05f, 0.05f);
     s_phong.set("light.diffuse", 1.0f, 1.0f, 1.0f);
     s_phong.set("light.specular", 1.0f, 1.0f, 1.0f);
     s_phong.set("light.constant", 1.0f);
-    s_phong.set("light.linear", 0.22f);
-    s_phong.set("light.quadratic", 0.20f);
-    s_phong.set("light.direction", camera.getDirection());
+    s_phong.set("light.linear", 0.022f);
+    s_phong.set("light.quadratic", 0.019f);
+    s_phong.set("light.direction", 0.2f, -1.0f, 0.0f);
     s_phong.set("light.cutOff", glm::cos(glm::radians(15.0f)));
     s_phong.set("light.outerCutOff", glm::cos(glm::radians(25.0f)));
+
+    glStencilMask(0x00);
     quad.render();
 
+    // First pass
+    glStencilMask(0xFF);
+    glStencilFunc(GL_ALWAYS, 1, 0xFF);
     for (auto &cubePos : cubePositions)
     {
         model = glm::mat4(1.0f);
         model = glm::translate(model, cubePos);
-        s_phong.set("model", model);
+        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
         normalMat = glm::inverse(glm::transpose(glm::mat3(model)));
+        s_phong.set("model", model);
         s_phong.set("normalMat", normalMat);
         cube.render();
     }
+
+    // Second pass
+    glStencilMask(0x00);
+    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+    glDisable(GL_DEPTH_TEST);
+    s_stencil.use();
+    s_stencil.set("proj", proj);
+    s_stencil.set("view", view);
+    s_stencil.set("color", 0.7f, 0.7f, 0.7f, 1.0f);
+    for (auto &cubePos : cubePositions)
+    {
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, cubePos);
+        model = glm::scale(model, glm::vec3(1.1f, 1.1f, 1.1f));
+        s_stencil.set("model", model);
+        cube.render();
+    }
+    glStencilMask(0xFF);
+    glEnable(GL_DEPTH_TEST);
 }
 
 int main()
@@ -159,6 +184,7 @@ int main()
     // Create program
     const Shader s_light(PROJECT_PATH "light.vert", PROJECT_PATH "light.frag");
     const Shader s_phong(PROJECT_PATH "phong.vert", PROJECT_PATH "blinn.frag");
+    const Shader s_stencil(PROJECT_PATH "stencil.vert", PROJECT_PATH "stencil.frag");
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     // Enable culling
     glEnable(GL_CULL_FACE);
@@ -166,6 +192,11 @@ int main()
     // Enable depth test
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
+
+    // Enable stencil
+    glEnable(GL_STENCIL_TEST);
+    // glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
     // Display only lines
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -186,7 +217,7 @@ int main()
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
         handleInput(deltaTime);
-        render(s_light, s_phong, cube, quad, 36, tex_albedo, tex_specular);
+        render(s_light, s_phong, s_stencil, cube, quad, 36, tex_albedo, tex_specular);
         window->frame();
     }
 
