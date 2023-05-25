@@ -11,4 +11,5 @@ set(PROJECT_LIST
     10_LightDir
     11_LightPoint
     12_LightSpot
+    13_CustomObjects
 )
