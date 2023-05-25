@@ -24,9 +24,16 @@ add_library(EngineLib STATIC ${ENGINE_SRC_FILES} ${ENGINE_HEADER_FILES} ${DEPS_S
 target_include_directories(EngineLib PRIVATE ${INCLUDE_PATHS})
 target_compile_definitions(EngineLib PRIVATE -D_GLFW_USE_OPENGL=1)
 target_compile_features(EngineLib PRIVATE cxx_std_17)
+target_link_libraries(EngineLib PRIVATE debug ${CMAKE_CURRENT_LIST_DIR}/libs/Debug/assimp-windows.lib)
 
 configure_platform(EngineLib)
 configure_compiler(EngineLib)
+
+add_custom_command(TARGET EngineLib POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "${CMAKE_CURRENT_LIST_DIR}/libs/$<CONFIGURATION>/assimp-windows.dll"
+    $<TARGET_FILE_DIR:EngineLib>
+)
 
 #****************************************************
 # Projects
