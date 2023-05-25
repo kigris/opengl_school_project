@@ -12,4 +12,5 @@ set(PROJECT_LIST
     11_LightPoint
     12_LightSpot
     13_CustomObjects
+    14_Stencil
 )
