@@ -11,7 +11,7 @@
 #include <glad/glad.h>
 #include "stb_image.h"
 #include <glm/glm.hpp>
-#include <GLFW/glfw3.h>
+#include <GLFW/glfw3.h>0
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #ifdef _WIN32 // If OS is Windows
@@ -25,13 +25,27 @@
 #include "engine/input.hpp"
 #include "engine/window.hpp"
 #include "engine/shader.hpp"
-#include "engine/geometry/sphere.hpp"
+#include "engine/geometry/cube.hpp"
+#include "engine/geometry/quad.hpp"
 #include "engine/camera.hpp"
 #include "engine/texture.hpp"
+
+glm::vec3 cubePositions[] = {
+    glm::vec3(0.0f, 0.0f, -4.0f),
+    glm::vec3(0.0f, 0.0f, 4.0f),
+    glm::vec3(-4.0f, 0.0f, 0.0f),
+    glm::vec3(4.0f, 0.0f, 0.0f),
+    glm::vec3(4.0f, 0.0f, 4.0f),
+    glm::vec3(4.0f, 0.0f, -4.0f),
+    glm::vec3(-4.0f, 0.0f, 4.0f),
+    glm::vec3(-4.0f, 0.0f, -4.0f),
+};
 
 bool firstMouse = true;
 double lastX, lastY;
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+glm::vec3 lightPos(0.0f, 1.0f, 3.0f);
+glm::vec3 lightPos2(0.0f, 1.0f, -3.0f);
 
 void onMouseCallback(double xpos, double ypos)
 {
@@ -50,29 +64,34 @@ void onMouseCallback(double xpos, double ypos)
     camera.handleMouseMovement(xoffset, yoffset);
 }
 
-void onScrollCallback(double xoffset, double yoffset) {
-  camera.handleMouseScroll(yoffset);
+void onScrollCallback(double xoffset, double yoffset)
+{
+    camera.handleMouseScroll(yoffset);
 }
 
 void handleInput(float deltaTime)
 {
-    Input* input = Input::instance();
-    if(input->isKeyPressed(GLFW_KEY_W)) {
+    Input *input = Input::instance();
+    if (input->isKeyPressed(GLFW_KEY_W))
+    {
         camera.handleKeyboard(Camera::Movement::Forward, deltaTime);
     }
-    if(input->isKeyPressed(GLFW_KEY_S)) {
+    if (input->isKeyPressed(GLFW_KEY_S))
+    {
         camera.handleKeyboard(Camera::Movement::Backward, deltaTime);
     }
-    if(input->isKeyPressed(GLFW_KEY_A)) {
+    if (input->isKeyPressed(GLFW_KEY_A))
+    {
         camera.handleKeyboard(Camera::Movement::Left, deltaTime);
     }
-    if(input->isKeyPressed(GLFW_KEY_D)) {
+    if (input->isKeyPressed(GLFW_KEY_D))
+    {
         camera.handleKeyboard(Camera::Movement::Right, deltaTime);
     }
 }
 
 // Render VAO
-void render(const Shader &s_light, const Shader &s_phong, const Geometry &geo, int n)
+void render(const Shader &s_light, const Shader &s_phong, const Geometry &cube, const Geometry &quad, int n, const Texture &tex_albedo, const Texture &tex_specular)
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     // Get the view matrix from camera
@@ -82,65 +101,80 @@ void render(const Shader &s_light, const Shader &s_phong, const Geometry &geo, i
     s_light.use();
     // Model matrix for the light source
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(1.2f, 1.0f, 2.0f));
+    model = glm::translate(model, lightPos);
     model = glm::scale(model, glm::vec3(0.2f));
     s_light.set("model", model);
     s_light.set("view", view);
     s_light.set("proj", proj);
-    geo.render();
+    cube.render();
+    model = glm::mat4(1.0f);
+    model = glm::translate(model, lightPos2);
+    model = glm::scale(model, glm::vec3(0.2f));
+    s_light.set("model", model);
+    cube.render();
 
     s_phong.use();
     // Model matrix for the light source
     model = glm::mat4(1.0f);
-    model = glm::scale(model, glm::vec3(1.0f, 2.0f, 1.0f));
+    model = glm::translate(model, glm::vec3(0.0f, -0.5f, 0.0f));
+    model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
     s_phong.set("model", model);
     s_phong.set("view", view);
     s_phong.set("proj", proj);
     glm::mat3 normalMat = glm::inverse(glm::transpose(glm::mat3(model)));
     s_phong.set("normalMat", normalMat);
     s_phong.set("viewPos", camera.getPosition());
-    s_phong.set("lightPos", 1.2f, 1.0f, 2.0f);
-    s_phong.set("lightColor", 1.0f, 1.0f, 1.0f);
-    s_phong.set("objectColor", 1.0f, 0.5f, 0.31f);
-    s_phong.set("ambientStrength", 0.1f);
-    s_phong.set("specularStrength", 0.5f);
-    s_phong.set("shininess", 32);
-    // Set the uniform for the view matrix
-    s_phong.set("viewMat", view);
-    geo.render();
-}
+    quad.render();
+    
+    // Set uniforms for the material
+    tex_albedo.use(s_phong, "material.diffuse", 0);
+    tex_specular.use(s_phong, "material.specular", 1);
+    // s_phong.set("material.diffuse", 0);
+    // s_phong.set("material.specular", 1);
+    s_phong.set("material.shininess", 128);
 
-uint32_t createTexture(const char *path)
-{
-    uint32_t texture;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
+    // Set uniforms for the material
+    // Dir lights
+    s_phong.set("dirLights[0].direction", 0.3f, -1.0f, 0.0f);
+    s_phong.set("dirLights[0].ambient", 0.1f, 0.1f, 0.1f);
+    s_phong.set("dirLights[0].diffuse", 0.4f, 0.0f, 0.0f);
+    s_phong.set("dirLights[0].specular", 0.4f, 0.4f, 0.4f);
+    s_phong.set("dirLights[0].intensity", 0.2f);
+    // Point lights
+    s_phong.set("pointLights[0].position", lightPos);
+    s_phong.set("pointLights[0].ambient", 0.1f, 0.1f, 0.1f);
+    s_phong.set("pointLights[0].diffuse", 0.5f, 0.5f, 0.5f);
+    s_phong.set("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
+    s_phong.set("pointLights[0].constant", 1.0f);
+    s_phong.set("pointLights[0].linear", 0.9f);
+    s_phong.set("pointLights[0].quadratic", 0.32f);
+    s_phong.set("pointLights[1].position", lightPos2);
+    s_phong.set("pointLights[1].ambient", 0.1f, 0.1f, 0.1f);
+    s_phong.set("pointLights[1].diffuse", 0.0f, 0.5f, 0.5f);
+    s_phong.set("pointLights[1].specular", 1.0f, 1.0f, 1.0f);
+    s_phong.set("pointLights[1].constant", 1.0f);
+    s_phong.set("pointLights[1].linear", 0.9f);
+    s_phong.set("pointLights[1].quadratic", 0.32f);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // stbi_set_flip_vertically_on_load(true);
-    int width, height, nrChannels;
-    unsigned char *data = stbi_load(path, &width, &height, &nrChannels, 0);
-    if (!data)
+    for (auto &cubePos : cubePositions)
     {
-        std::cout << "Failed to load texture" << std::endl;
-        exit(EXIT_FAILURE);
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, cubePos);
+        s_phong.set("model", model);
+        normalMat = glm::inverse(glm::transpose(glm::mat3(model)));
+        s_phong.set("normalMat", normalMat);
+        cube.render();
     }
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(GL_TEXTURE_2D);
-    stbi_image_free(data);
-    return texture;
 }
 
 int main()
 {
     // Get window instance
     Window *window = Window::instance();
-    // Create sphere
-    const Sphere sphere(0.75f, 50, 50);
+    // Create cube
+    const Cube cube(0.75f);
+    const Quad quad(10.0f);
     // Create program
     const Shader s_light(PROJECT_PATH "light.vert", PROJECT_PATH "light.frag");
     const Shader s_phong(PROJECT_PATH "phong.vert", PROJECT_PATH "blinn.frag");
@@ -154,7 +188,8 @@ int main()
 
     // Display only lines
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
+    const Texture tex_albedo(ASSETS_PATH "textures/bricks_albedo.png", Texture::Format::RGB);
+    const Texture tex_specular(ASSETS_PATH "textures/bricks_specular.png", Texture::Format::RGB);
     // Set mouse callback
     Input::instance()->setMouseMoveCallback(onMouseCallback);
     Input::instance()->setMouseScrollCallback(onScrollCallback);
@@ -170,7 +205,7 @@ int main()
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
         handleInput(deltaTime);
-        render(s_light, s_phong, sphere, 36);
+        render(s_light, s_phong, cube, quad, 36, tex_albedo, tex_specular);
         window->frame();
     }
 
