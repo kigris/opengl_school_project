@@ -92,6 +92,7 @@ void render(const Shader &s_light, const Shader &s_phong, const Geometry &geo, i
     s_phong.use();
     // Model matrix for the light source
     model = glm::mat4(1.0f);
+    model = glm::scale(model, glm::vec3(1.0f, 2.0f, 1.0f));
     s_phong.set("model", model);
     s_phong.set("view", view);
     s_phong.set("proj", proj);
