@@ -15,4 +15,5 @@ set(PROJECT_LIST
     14_Stencil
     15_NormalMapping
     16_MultipleLights
+    17_CustomObjectWithLighting
 )
