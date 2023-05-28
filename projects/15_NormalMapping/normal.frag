@@ -32,9 +32,9 @@ uniform Light light;
 void main() {
     // Sample normal
     vec3 normal = vec3(texture(material.normal, uv));
-    normal = normalize(normal * 2 - 1.0f);
+    normal = normalize(normal * 2 - 1.0);
 
-    // Albeto color
+    // Albedo color
     vec3 albedo = vec3(texture(material.diffuse, uv));
     // Ambient color
     vec3 ambient = light.ambient * albedo;
