@@ -30,6 +30,7 @@
 #include "engine/camera.hpp"
 #include "engine/texture.hpp"
 #include "engine/model.hpp"
+#include "engine/light.hpp"
 
 glm::vec3 cubePositions[] = {
     glm::vec3(0.0f, 0.0f, -4.0f),
@@ -47,6 +48,36 @@ double lastX, lastY;
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 glm::vec3 lightPos(0.0f, 1.0f, 3.0f);
 glm::vec3 lightPos2(0.0f, 1.0f, -3.0f);
+
+DirectionalLight dirLight(
+    glm::vec3(-0.2f, -1.0f, -0.3f),
+    glm::vec3(0.05f, 0.05f, 0.05f),
+    glm::vec3(0.4f, 0.4f, 0.4f),
+    glm::vec3(0.5f, 0.5f, 0.5f),
+    0.8f
+);
+
+PointLight pointLight(
+    lightPos,
+    glm::vec3(0.05f, 0.05f, 0.05f),
+    glm::vec3(0.2f, 0.1f, 0.8f),
+    glm::vec3(0.6f, 0.6f, 0.6f),
+    0.4f,
+    1.0f,
+    0.9f,
+    0.32f
+);
+
+PointLight pointLight2(
+    lightPos2,
+    glm::vec3(0.05f, 0.05f, 0.05f),
+    glm::vec3(0.1f, 0.8f, 0.3f),
+    glm::vec3(0.4f, 0.4f, 0.4f),
+    1.0f,
+    1.0f,
+    0.9f,
+    0.32f
+);
 
 void onMouseCallback(double xpos, double ypos)
 {
@@ -137,27 +168,29 @@ void render(const Shader &s_light, const Shader &s_phong, const Shader &s_phongC
 
     // Set uniforms for the material
     // Dir lights
-    s_phong.set("dirLights[0].direction", 0.3f, -1.0f, 0.0f);
-    s_phong.set("dirLights[0].ambient", 0.1f, 0.1f, 0.1f);
-    s_phong.set("dirLights[0].diffuse", 1.0f, 1.0f, 1.0f);
-    s_phong.set("dirLights[0].specular", 0.4f, 0.4f, 0.4f);
-    s_phong.set("dirLights[0].intensity", 0.2f);
+    // s_phong.set("dirLights[0].direction", 0.3f, -1.0f, 0.0f);
+    // s_phong.set("dirLights[0].ambient", 0.1f, 0.1f, 0.1f);
+    // s_phong.set("dirLights[0].diffuse", 1.0f, 1.0f, 1.0f);
+    // s_phong.set("dirLights[0].specular", 0.4f, 0.4f, 0.4f);
+    // s_phong.set("dirLights[0].intensity", 0.2f);
+    dirLight.set(s_phong, "dirLights[0]");
     // Point lights
-    s_phong.set("pointLights[0].position", lightPos);
-    s_phong.set("pointLights[0].ambient", 0.1f, 0.1f, 0.1f);
-    s_phong.set("pointLights[0].diffuse", 0.5f, 0.5f, 0.5f);
-    s_phong.set("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
-    s_phong.set("pointLights[0].constant", 1.0f);
-    s_phong.set("pointLights[0].linear", 0.9f);
-    s_phong.set("pointLights[0].quadratic", 0.32f);
-    s_phong.set("pointLights[1].position", lightPos2);
-    s_phong.set("pointLights[1].ambient", 0.1f, 0.1f, 0.1f);
-    s_phong.set("pointLights[1].diffuse", 0.0f, 0.5f, 0.5f);
-    s_phong.set("pointLights[1].specular", 1.0f, 1.0f, 1.0f);
-    s_phong.set("pointLights[1].constant", 1.0f);
-    s_phong.set("pointLights[1].linear", 0.9f);
-    s_phong.set("pointLights[1].quadratic", 0.32f);
-
+    // s_phong.set("pointLights[0].position", lightPos);
+    // s_phong.set("pointLights[0].ambient", 0.1f, 0.1f, 0.1f);
+    // s_phong.set("pointLights[0].diffuse", 0.5f, 0.5f, 0.5f);
+    // s_phong.set("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
+    // s_phong.set("pointLights[0].constant", 1.0f);
+    // s_phong.set("pointLights[0].linear", 0.9f);
+    // s_phong.set("pointLights[0].quadratic", 0.32f);
+    // s_phong.set("pointLights[1].position", lightPos2);
+    // s_phong.set("pointLights[1].ambient", 0.1f, 0.1f, 0.1f);
+    // s_phong.set("pointLights[1].diffuse", 0.0f, 0.5f, 0.5f);
+    // s_phong.set("pointLights[1].specular", 1.0f, 1.0f, 1.0f);
+    // s_phong.set("pointLights[1].constant", 1.0f);
+    // s_phong.set("pointLights[1].linear", 0.9f);
+    // s_phong.set("pointLights[1].quadratic", 0.32f);
+    pointLight.set(s_phong, "pointLights[0]");
+    pointLight2.set(s_phong, "pointLights[1]");
 
     for (auto &cubePos : cubePositions)
     {
@@ -175,30 +208,15 @@ void render(const Shader &s_light, const Shader &s_phong, const Shader &s_phongC
     s_phongCustomObj.set("view", view);
     s_phongCustomObj.set("proj", proj);
     s_phongCustomObj.set("model", model);
-    s_phongCustomObj.set("dirLights[0].direction", 0.3f, -0.7f, 0.4f);
-    s_phongCustomObj.set("dirLights[0].ambient", 0.1f, 0.1f, 0.1f);
-    s_phongCustomObj.set("dirLights[0].diffuse", 1.0f, 1.0f, 1.0f);
-    s_phongCustomObj.set("dirLights[0].specular", 0.4f, 0.4f, 0.4f);
-    s_phongCustomObj.set("dirLights[0].intensity", 0.4f);
+    // Set dir lights
+    dirLight.set(s_phongCustomObj, "dirLights[0]");
     // Point lights
-    s_phongCustomObj.set("pointLights[0].position", lightPos);
-    s_phongCustomObj.set("pointLights[0].ambient", 0.1f, 0.1f, 0.1f);
-    s_phongCustomObj.set("pointLights[0].diffuse", 0.5f, 0.5f, 0.5f);
-    s_phongCustomObj.set("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
-    s_phongCustomObj.set("pointLights[0].constant", 1.0f);
-    s_phongCustomObj.set("pointLights[0].linear", 0.09f);
-    s_phongCustomObj.set("pointLights[0].quadratic", 0.032f);
-    s_phongCustomObj.set("pointLights[1].position", lightPos2);
-    s_phongCustomObj.set("pointLights[1].ambient", 0.1f, 0.1f, 0.1f);
-    s_phongCustomObj.set("pointLights[1].diffuse", 0.0f, 0.5f, 0.5f);
-    s_phongCustomObj.set("pointLights[1].specular", 1.0f, 1.0f, 1.0f);
-    s_phongCustomObj.set("pointLights[1].constant", 1.0f);
-    s_phongCustomObj.set("pointLights[1].linear", 0.09f);
-    s_phongCustomObj.set("pointLights[1].quadratic", 0.032f);
+    pointLight.set(s_phongCustomObj, "pointLights[0]");
+    pointLight2.set(s_phongCustomObj, "pointLights[1]");
     normalMat = glm::inverse(glm::transpose(glm::mat3(model)));
     s_phongCustomObj.set("normalMat", normalMat);
     s_phongCustomObj.set("viewPos", camera.getPosition());
-    s_phongCustomObj.set("material.shininess", 256);
+    s_phongCustomObj.set("material.shininess", 64);
     obj.render(s_phongCustomObj);
 }
 
@@ -214,7 +232,7 @@ int main()
     const Shader s_phong(PROJECT_PATH "phong.vert", PROJECT_PATH "blinn.frag");
     const Shader s_phongCustomObj(PROJECT_PATH "phongCustomObj.vert", PROJECT_PATH "blinnCustomObj.frag");
     // Import model
-    const Model object(ASSETS_PATH "models/Freighter/Freigther_BI_Export.obj");
+    const Model object(ASSETS_PATH "models/manticore/manticore.obj");
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     // Enable culling
     glEnable(GL_CULL_FACE);
