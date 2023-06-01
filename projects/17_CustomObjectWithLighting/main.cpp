@@ -130,6 +130,8 @@ void render(const Shader &s_light, const Shader &s_phong, const Shader &s_phongC
     glm::mat4 view = camera.getViewMatrix();
     // Set the projection matrix
     const glm::mat4 proj = glm::perspective(glm::radians(camera.getFOV()), 800.0f / 600.0f, 0.1f, 100.0f);
+
+    // Light source
     s_light.use();
     // Model matrix for the light source
     glm::mat4 model = glm::mat4(1.0f);
@@ -145,10 +147,11 @@ void render(const Shader &s_light, const Shader &s_phong, const Shader &s_phongC
     s_light.set("model", model);
     cube.render();
 
+    // Floor
     s_phong.use();
-    // Model matrix for the light source
+    // Model matrix for the floor
     model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(0.0f, -0.5f, 0.0f));
+    model = glm::translate(model, glm::vec3(0.0f, -0.35f, 0.0f));
     model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
     s_phong.set("model", model);
     s_phong.set("view", view);
@@ -161,34 +164,12 @@ void render(const Shader &s_light, const Shader &s_phong, const Shader &s_phongC
     s_phong.set("viewPos", camera.getPosition());
     quad.render();
     
-
-    // s_phong.set("material.diffuse", 0);
-    // s_phong.set("material.specular", 1);
-    s_phong.set("material.shininess", 128);
+    s_phong.set("material.shininess", 64);
 
     // Set uniforms for the material
     // Dir lights
-    // s_phong.set("dirLights[0].direction", 0.3f, -1.0f, 0.0f);
-    // s_phong.set("dirLights[0].ambient", 0.1f, 0.1f, 0.1f);
-    // s_phong.set("dirLights[0].diffuse", 1.0f, 1.0f, 1.0f);
-    // s_phong.set("dirLights[0].specular", 0.4f, 0.4f, 0.4f);
-    // s_phong.set("dirLights[0].intensity", 0.2f);
     dirLight.set(s_phong, "dirLights[0]");
     // Point lights
-    // s_phong.set("pointLights[0].position", lightPos);
-    // s_phong.set("pointLights[0].ambient", 0.1f, 0.1f, 0.1f);
-    // s_phong.set("pointLights[0].diffuse", 0.5f, 0.5f, 0.5f);
-    // s_phong.set("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
-    // s_phong.set("pointLights[0].constant", 1.0f);
-    // s_phong.set("pointLights[0].linear", 0.9f);
-    // s_phong.set("pointLights[0].quadratic", 0.32f);
-    // s_phong.set("pointLights[1].position", lightPos2);
-    // s_phong.set("pointLights[1].ambient", 0.1f, 0.1f, 0.1f);
-    // s_phong.set("pointLights[1].diffuse", 0.0f, 0.5f, 0.5f);
-    // s_phong.set("pointLights[1].specular", 1.0f, 1.0f, 1.0f);
-    // s_phong.set("pointLights[1].constant", 1.0f);
-    // s_phong.set("pointLights[1].linear", 0.9f);
-    // s_phong.set("pointLights[1].quadratic", 0.32f);
     pointLight.set(s_phong, "pointLights[0]");
     pointLight2.set(s_phong, "pointLights[1]");
 
@@ -201,9 +182,11 @@ void render(const Shader &s_light, const Shader &s_phong, const Shader &s_phongC
         s_phong.set("normalMat", normalMat);
         cube.render();
     }
+
     // Custom object part
     s_phongCustomObj.use();
     model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3(0.0f, -0.25f, 0.0f));
     model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
     s_phongCustomObj.set("view", view);
     s_phongCustomObj.set("proj", proj);
