@@ -16,4 +16,5 @@ set(PROJECT_LIST
     15_NormalMapping
     16_MultipleLights
     17_CustomObjectWithLighting
+    18_FrameBuffers
 )
