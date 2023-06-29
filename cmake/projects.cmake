@@ -18,4 +18,5 @@ set(PROJECT_LIST
     17_CustomObjectWithLighting
     18_FrameBuffers
     19_Shadowmaps
+    20_Gourad_Flat_Blinn
 )

@@ -1,0 +1,7 @@
+# 3ds Max Wavefront OBJ Exporter v0.97b - (c)2007 guruware
+# File Created: 20.12.2019 09:08:54
+
+map_Kd Container_DiffuseMap.png
+map_Bump Container_NormalsMap.png
+map_Ks Container_SpecularMap.png
+

@@ -1,0 +1,18 @@
+El modelo de iluminación "Flat" es una variante del de "Phong-Blinn", en
+el cuál simplemente se han de pasar las posiciones de las normales y el
+de los fragmentos como no interpoladas para crear el efecto "pixelado".
+También se podrían pasar las UVs, pero queda a gusto del usuario final.
+El modelo de iluminación "Phong-Blinn" es el que se vio en clase, uno de
+los más sencillos para iluminar cualquier escena 3D de manera decente.
+Tiene sus limitaciones en cuánto a los tipos de objeto que puede
+representar y no es para nada fotorealista.
+En ambos modelos "Flat" y "Phong-Blinn", los cálculos de la iluminación
+son procesados en el shader de fragmentos.
+En cambio, en el modelo "Gourad", estos cálculos son procesados en el
+shader de vértices. Esto tiene una ventaja y un inconveniente:
+- al ejecutarse los cálculos una vez por cada vértice, se ahorra más trabajo
+de computación que si fuera una vez cada fragmento,
+- pero se pierde precisión ya que se utilizan las posiciones de los vértices
+para los cálculos de iluminación, en vez de las posiciones de los fragmentos.
+En este examen se han implementado texturas que han sido "sampleadas" en el
+shader de fragmentos para una mayor precisión en este apartado.
